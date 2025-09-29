@@ -114,7 +114,7 @@ Com a VPC configurada, temos a base de rede para os próximos passos da implanta
 
 ## 2. Criação do Amazon RDS
 
-O Amazon Relational Database Service (RDS) fornecerá um banco de dados MySQL/MariaDB altamente disponível e gerenciado para o WordPress. Isso elimina a necessidade de gerenciar a infraestrutura do banco de dados, permitindo que nos concentremos na aplicação. Conforme o documento do projeto, utilizaremos uma instância Multi-AZ para resiliência e um grupo de segurança para controlar o acesso.
+O Amazon Relational Database Service (RDS) fornecerá um banco de dados MySQL/MariaDB altamente disponível e gerenciado para o WordPress. Isso elimina a necessidade de gerenciar a infraestrutura do banco de dados, permitindo que nos concentremos na aplicação. Utilizaremos uma instância Multi-AZ para resiliência e um grupo de segurança para controlar o acesso.
 
 ### Componentes do RDS:
 
@@ -155,12 +155,12 @@ O Amazon Relational Database Service (RDS) fornecerá um banco de dados MySQL/Ma
     *   **Choose a database creation method**: `Standard create`
     *   **Engine options**: `MySQL` (ou `MariaDB`)
     *   **Engine version**: Escolha a versão mais recente compatível com WordPress.
-    *   **Templates**: `Free tier` (para fins de teste e custo, conforme o documento original menciona `db.t3g.micro` e sem Multi-AZ para restrições de conta, mas para alta disponibilidade, o ideal é Multi-AZ).
-        *   **Nota Importante**: O documento original menciona `db.t3g.micro` e *sem a opção de Multi-AZ* devido a restrições de conta. Para um ambiente de produção em alta disponibilidade, **Multi-AZ é fortemente recomendado**. Se as restrições da sua conta permitirem, selecione `Multi-AZ deployment` -> `Create a standby instance`.
+    *   **Templates**: `Free tier` (para fins de teste e custo, `db.t3g.micro` e sem Multi-AZ para restrições de conta, mas para alta disponibilidade, o ideal é Multi-AZ).
+        *   **Nota Importante**: É bom usar `db.t3g.micro` e *sem a opção de Multi-AZ* devido a restrições de conta. Para um ambiente de produção em alta disponibilidade, **Multi-AZ é fortemente recomendado**. Se as restrições da sua conta permitirem, selecione `Multi-AZ deployment` -> `Create a standby instance`.
     *   **DB instance identifier**: `wordpress-db-instance`
     *   **Master username**: `admin` (ou outro de sua escolha)
     *   **Master password**: Defina uma senha forte e anote-a.
-    *   **DB instance size**: `Burstable classes (includes t classes)` -> `db.t3g.micro` (conforme especificado no documento).
+    *   **DB instance size**: `Burstable classes (includes t classes)` -> `db.t3g.micro` (conforme especificado).
     *   **Storage**: `General Purpose SSD (gp2)` ou `gp3`.
     *   **Connectivity**:
         *   **Virtual private cloud (VPC)**: `wordpress-vpc`
@@ -751,7 +751,7 @@ Ao longo da execução deste projeto, é crucial estar atento a alguns pontos es
 ### Restrições e Configurações Específicas
 
 *   **EC2**: As instâncias EC2 precisam conter as tags `Name`, `CostCenter` e `Project` associadas à instância e ao volume. Certifique-se de aplicar essas tags durante a criação do Launch Template ou diretamente nas instâncias, se forem criadas manualmente.
-*   **RDS MySQL**: As instâncias do RDS MySQL precisam ser do tipo `db.t3g.micro` e **sem a opção de Multi-AZ**. Esta é uma restrição importante mencionada no documento, para controle de custos e limitações da conta. Em um ambiente de produção real, para alta disponibilidade, a opção Multi-AZ seria a recomendada, mas para este projeto, siga a especificação de não usar Multi-AZ.
+*   **RDS MySQL**: As instâncias do RDS MySQL precisam ser do tipo `db.t3g.micro` e **sem a opção de Multi-AZ**. Esta é uma restrição importante, para controle de custos e limitações da conta. Em um ambiente de produção real, para alta disponibilidade, a opção Multi-AZ seria a recomendada, mas para este projeto, siga a especificação de não usar Multi-AZ.
 
 ### Exemplo de Tags para EC2:
 
