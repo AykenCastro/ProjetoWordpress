@@ -1,47 +1,49 @@
 #!/bin/bash
-# Atualizar os pacotes do sistema
-sudo yum update -y
+# Script de User-Data para instâncias WordPress
+# ATENÇÃO: Substitua os valores entre <> abaixo
 
-# Instalar, iniciar e configurar a inicialização automática do docker
-sudo yum install docker -y
-sudo systemctl start docker.service
-sudo systemctl enable docker.service
+# --- Variáveis (SUBSTITUIR AQUI) ---
+EFS_ID="<SEU_EFS_FILE_SYSTEM_ID>"            # Ex: fs-0123456789abcdef0
+DB_NAME="<NOME_DO_SEU_BANCO_DE_DADOS_RDS>"   # Ex: wordpressdb
+DB_USER="<USUARIO_DO_SEU_BANCO_DE_DADOS_RDS>" # Ex: admin
+DB_PASSWORD="<SENHA_DO_SEU_BANCO_DE_DADOS_RDS>"
+DB_HOST="<ENDPOINT_DO_SEU_BANCO_DE_DADOS_RDS>" # Ex: wordpress-db.c12345.us-east-1.rds.amazonaws.com
 
-# Adicionar o usuário ec2-user ao grupo docker
-sudo usermod -aG docker ec2-user
+# --- Início do Script ---
+yum update -y
+yum install -y httpd php php-mysqlnd amazon-efs-utils
 
-#Intalação do Docker Compose
-sudo yum install glibc
-sudo yum install python-pip
-sudo curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo mv /usr/local/bin/docker-compose /usr/bin/docker-compose
-sudo chmod +x /usr/bin/docker-compose
-pip install docker-compose
+# Montar o EFS na pasta de conteúdo do WordPress
+EFS_MOUNT_POINT="/var/www/html/wp-content"
+mkdir -p ${EFS_MOUNT_POINT}
+mount -t efs -o tls ${EFS_ID}:/ ${EFS_MOUNT_POINT}
 
-# Montagem do EFS
-sudo yum -y install amazon-efs-utils
-sudo mkdir /mnt/efs
-sudo mount -t efs -o tls < ID DO EFS >:/ /mnt/efs
+# Adicionar a montagem do EFS ao fstab para remontar após reinicializações
+echo "${EFS_ID}:/ ${EFS_MOUNT_POINT} efs _netdev,tls 0 0" >> /etc/fstab
 
-# Criar um arquivo docker-compose.yml para configurar o WordPress
-sudo cat <<EOL > /mnt/efs/docker-compose.yml
-version: '3.8'
-services:
-    wordpress:
-        image: wordpress:latest
-        container_name: wordpress
-        ports:
-          - "80:80"
-        environment:
-          WORDPRESS_DB_HOST: <Endpoint do RDS>
-          WORDPRESS_DB_NAME: <nome do database>
-          WORDPRESS_DB_USER: <usuario>
-          WORDPRESS_DB_PASSWORD: <senha>
-        volumes:
-          - /mnt/efs:/var/www/html
-EOL
+# Configurar o wp-config.php
+# Atenção: Isso assume que o EFS já contém os arquivos do WordPress, exceto o wp-config.php
+WP_CONFIG_FILE="/var/www/html/wp-config.php"
 
-# Inicializar o WordPress com docker-compose e cria o banco de dados
-sudo chown -R ec2-user:ec2-user /docker
-sudo docker-compose -f /docker/docker-compose.yml up -d
-sudo yum install mariadb-server -y
+# Apenas cria o wp-config se ele não existir
+if [ ! -f "$WP_CONFIG_FILE" ]; then
+  # Use o arquivo de exemplo para criar o config
+  cp /var/www/html/wp-config-sample.php ${WP_CONFIG_FILE}
+  
+  # Substituir os valores do banco de dados
+  sed -i "s/database_name_here/${DB_NAME}/" ${WP_CONFIG_FILE}
+  sed -i "s/username_here/${DB_USER}/" ${WP_CONFIG_FILE}
+  sed -i "s/password_here/${DB_PASSWORD}/" ${WP_CONFIG_FILE}
+  sed -i "s/localhost/${DB_HOST}/" ${WP_CONFIG_FILE}
+
+  # Adicionar chaves de segurança únicas do WordPress
+  # Baixa as chaves da API oficial e as insere no arquivo
+  SALT=$(curl -L https://api.wordpress.org/secret-key/1.1/salt/)
+  STRING='put your unique phrase here'
+  printf '%s\n' "g/$STRING/d" a "$SALT" . w | ed -s ${WP_CONFIG_FILE}
+fi
+
+# Ajustar permissões e iniciar o Apache
+chown -R apache:apache /var/www/html
+systemctl enable httpd
+systemctl start httpd
