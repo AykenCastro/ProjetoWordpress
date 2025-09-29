@@ -751,7 +751,7 @@ Ao longo da execução deste projeto, é crucial estar atento a alguns pontos es
 ### Restrições e Configurações Específicas
 
 *   **EC2**: As instâncias EC2 precisam conter as tags `Name`, `CostCenter` e `Project` associadas à instância e ao volume. Certifique-se de aplicar essas tags durante a criação do Launch Template ou diretamente nas instâncias, se forem criadas manualmente.
-*   **RDS MySQL**: As instâncias do RDS MySQL precisam ser do tipo `db.t3g.micro` e **sem a opção de Multi-AZ**. Esta é uma restrição importante mencionada no documento original, provavelmente para controle de custos ou limitações da conta. Em um ambiente de produção real, para alta disponibilidade, a opção Multi-AZ seria a recomendada, mas para este projeto, siga a especificação de não usar Multi-AZ.
+*   **RDS MySQL**: As instâncias do RDS MySQL precisam ser do tipo `db.t3g.micro` e **sem a opção de Multi-AZ**. Esta é uma restrição importante mencionada no documento, para controle de custos e limitações da conta. Em um ambiente de produção real, para alta disponibilidade, a opção Multi-AZ seria a recomendada, mas para este projeto, siga a especificação de não usar Multi-AZ.
 
 ### Exemplo de Tags para EC2:
 
