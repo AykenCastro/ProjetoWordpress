@@ -6,7 +6,7 @@
 
 ## Introdução
 
-Este guia tem como objetivo fornecer um passo a passo detalhado e completo para a implantação de uma plataforma WordPress em alta disponibilidade, escalável e tolerante a falhas na nuvem AWS. Utilizaremos os principais serviços gerenciados da AWS para garantir desempenho e disponibilidade, simulando um ambiente de produção real onde interrupções não podem causar indisponibilidade da aplicação. O projeto se baseia nos requisitos fornecidos no documento "Projeto2-FundamentosdeAWS-Wordpresss.pdf" e incorpora melhores práticas de arquitetura na AWS.
+Este guia tem como objetivo fornecer um passo a passo detalhado e completo para a implantação de uma plataforma WordPress em alta disponibilidade, escalável e tolerante a falhas na nuvem AWS. Utilizaremos os principais serviços gerenciados da AWS para garantir desempenho e disponibilidade, simulando um ambiente de produção real onde interrupções não podem causar indisponibilidade da aplicação.
 
 ## Arquitetura Proposta
 
